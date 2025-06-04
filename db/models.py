@@ -1,77 +1,112 @@
 from .database import Base
 from sqlalchemy import Column, Integer, String, ForeignKey, Text
-#crear la calse de modelo (identidad)
 class Usuario(Base):
     __tablename__ = "usuarios"
     id = Column(Integer, primary_key=True)
-    nombre_usuario = Column(String(40), unique=True)
-    correo = Column(String(100), unique=True)
-    contraseña = Column(String(255))
-    nombre_completo = Column(String(100))
-
-
+    nombre_usuario = Column(String(40), unique=True, nullable=False)
+    correo = Column(String(100), unique=True, nullable=False)
+    contraseña = Column(String(255), nullable=False)
+    genero = Column(String(20))
+    fecha_nacimiento = Column(String(50))
+    telefono = Column(String(20))
+    fecha_registro = Column(String(50))
+    
 class Perfil(Base):
     __tablename__ = "perfiles"
     id = Column(Integer, primary_key=True)
-    usuario_id = Column(Integer, ForeignKey("usuarios.id"))
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"), unique=True)
+    nombre_completo = Column(String(100))
     biografia = Column(Text)
     foto_perfil = Column(String(255))
+    sitio_web = Column(String(255))
+    coleccion_arte = Column(Text)  
+    talleres_inscritos = Column(Text) 
+    amigos = Column(Text)  
+    fecha_publicacion = Column(String(50))
+  
 
-
-class ObraArte(Base):
-    __tablename__ = "obras_arte"
+class PublicacionObra(Base):
+    __tablename__ = "publicaciones_obra"
     id = Column(Integer, primary_key=True)
-    titulo = Column(String(100))
+    titulo = Column(String(100), nullable=False)
     descripcion = Column(Text)
-    archivo = Column(String(255))
-    usuario_id = Column(Integer, ForeignKey("usuarios.id"))
-    categoria_id = Column(Integer, ForeignKey("categorias_obra.id"))
+    estado = Column(String(50)) 
+    archivo_url = Column(String(255), nullable=False)
+    fecha_publicacion = Column(String(50))
+    autor_id = Column(Integer, ForeignKey("usuarios.id"))
 
 
 class CategoriaObra(Base):
     __tablename__ = "categorias_obra"
     id = Column(Integer, primary_key=True)
-    nombre = Column(String(50))
-
+    nombre = Column(String(50), nullable=False)
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
 
 class ComentarioObra(Base):
     __tablename__ = "comentarios_obra"
     id = Column(Integer, primary_key=True)
     contenido = Column(Text)
     usuario_id = Column(Integer, ForeignKey("usuarios.id"))
-    obra_id = Column(Integer, ForeignKey("obras_arte.id"))
+    obra_id = Column(Integer, ForeignKey("publicaciones_obra.id"))
 
 
 class LikeObra(Base):
     __tablename__ = "likes_obra"
     id = Column(Integer, primary_key=True)
+    publicacion_id = Column(Integer, ForeignKey("publicaciones_obra.id"))
     usuario_id = Column(Integer, ForeignKey("usuarios.id"))
-    obra_id = Column(Integer, ForeignKey("obras_arte.id"))
+    tipo_reaccion = Column(String(50)) 
+    fecha_like = Column(String(50))
 
+class HistorialInteracciones(Base):
+    __tablename__ = "historial_interacciones"
+    id = Column(Integer, primary_key=True)
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"))
+    tipo = Column(String(50))  
+    referencia_id = Column(Integer) 
+    fecha = Column(String(50)) 
 
 class Blog(Base):
     __tablename__ = "blogs"
     id = Column(Integer, primary_key=True)
-    titulo = Column(String(100))
-    contenido = Column(Text)
-    usuario_id = Column(Integer, ForeignKey("usuarios.id"))
+    titulo = Column(String(150), nullable=False)
+    administrador_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
+    descripcion = Column(Text)
+    administrador_id = Column(Integer, ForeignKey("usuarios.id"))
+    fecha_publicacion = Column(String(50))
 
-
-class ComentarioBlog(Base):
-    __tablename__ = "comentarios_blog"
+class PublicacionBlog(Base):
+    __tablename__ = "publicaciones_blog"
     id = Column(Integer, primary_key=True)
-    contenido = Column(Text)
-    usuario_id = Column(Integer, ForeignKey("usuarios.id"))
     blog_id = Column(Integer, ForeignKey("blogs.id"))
+    autor_id = Column(Integer, ForeignKey("usuarios.id"))
+    contenido = Column(Text, nullable=False)
+    fecha_publicacion = Column(String(50))
 
+class LikeBlog(Base):
+    __tablename__ = "likes_blog"
+    id = Column(Integer, primary_key=True)
+    publicacion_blog_id = Column(Integer, ForeignKey("publicaciones_blog.id"))
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"))
+    tipo_reaccion = Column(String(50)) 
+    fecha_like = Column(String(50))
+
+class HistorialBlog(Base):
+    __tablename__ = "historial_blog"
+    id = Column(Integer, primary_key=True)
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"))
+    publicacion_blog_id = Column(Integer, ForeignKey("publicaciones_blog.id"))
+    tipo_interaccion = Column(String(50))  
+    fecha = Column(String(50))
 
 class Comunidad(Base):
     __tablename__ = "comunidades"
     id = Column(Integer, primary_key=True)
-    nombre = Column(String(100))
+    nombre = Column(String(100), unique=True, nullable=False)
+    administrador_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
     descripcion = Column(Text)
-    creador_id = Column(Integer, ForeignKey("usuarios.id"))
-
+    administrador_id = Column(Integer, ForeignKey("usuarios.id"))
+    fecha_publicacion = Column(String(50))
 
 class MiembroComunidad(Base):
     __tablename__ = "miembros_comunidad"
@@ -79,14 +114,29 @@ class MiembroComunidad(Base):
     usuario_id = Column(Integer, ForeignKey("usuarios.id"))
     comunidad_id = Column(Integer, ForeignKey("comunidades.id"))
 
-
 class PublicacionComunidad(Base):
     __tablename__ = "publicaciones_comunidad"
     id = Column(Integer, primary_key=True)
-    contenido = Column(Text)
     comunidad_id = Column(Integer, ForeignKey("comunidades.id"))
-    usuario_id = Column(Integer, ForeignKey("usuarios.id"))
+    autor_id = Column(Integer, ForeignKey("usuarios.id"))
+    contenido = Column(Text)
+    fecha_publicacion = Column(String(50))
 
+class LikeComunidad(Base):
+    __tablename__ = "likes_comunidad"
+    id = Column(Integer, primary_key=True)
+    publicacion_comunidad_id = Column(Integer, ForeignKey("publicaciones_comunidad.id"))
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"))
+    tipo_reaccion = Column(String(50)) 
+    fecha_like = Column(String(50))
+
+class HistorialComunidad(Base):
+    __tablename__ = "historial_comunidad"
+    id = Column(Integer, primary_key=True)
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"))
+    publicacion_comunidad_id = Column(Integer, ForeignKey("publicaciones_comunidad.id"))
+    tipo_interaccion = Column(String(50)) 
+    fecha = Column(String(50))
 
 class MensajePrivado(Base):
     __tablename__ = "mensajes_privados"
@@ -94,7 +144,6 @@ class MensajePrivado(Base):
     contenido = Column(Text)
     emisor_id = Column(Integer, ForeignKey("usuarios.id"))
     receptor_id = Column(Integer, ForeignKey("usuarios.id"))
-
 
 class Notificacion(Base):
     __tablename__ = "notificaciones"
@@ -104,18 +153,21 @@ class Notificacion(Base):
 class Taller(Base):
     __tablename__ = "talleres"
     id = Column(Integer, primary_key=True)
-    nombre = Column(String(100))
+    titulo = Column(String(150), nullable=False)
     descripcion = Column(Text)
-    cupo = Column(Integer)
-    creador_id = Column(Integer, ForeignKey("usuarios.id"))
-
+    fecha_inicio = Column (String(50))
+    fecha_fin = Column (String(50))
+    fecha_publicacion = Column (String(50))
+    publicaciones_progreso = Column(Text)
+    comentarios = Column(Text)
 
 class InscripcionTaller(Base):
     __tablename__ = "inscripciones_taller"
     id = Column(Integer, primary_key=True)
-    usuario_id = Column(Integer, ForeignKey("usuarios.id"))
     taller_id = Column(Integer, ForeignKey("talleres.id"))
-
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"))
+    contraseña = Column(String(100))
+    fecha_inscripcion = Column(String(50))
 
 class RecursoEducativo(Base):
     __tablename__ = "recursos_educativos"
@@ -126,35 +178,19 @@ class RecursoEducativo(Base):
     autor_id = Column(Integer, ForeignKey("usuarios.id"))
 
 
-class HistorialInteracciones(Base):
-    __tablename__ = "historial_interacciones"
-    id = Column(Integer, primary_key=True)
-    usuario_id = Column(Integer, ForeignKey("usuarios.id"))
-    tipo = Column(String(50)) 
-    referencia_id = Column(Integer) 
-
-
-class ReportePlagio(Base):
-    __tablename__ = "reportes_plagio"
-    id = Column(Integer, primary_key=True)
-    obra_id = Column(Integer, ForeignKey("obras_arte.id"))
-    reportado_por_id = Column(Integer, ForeignKey("usuarios.id"))
-    descripcion = Column(Text)
-
-
-class ConfiguracionUsuario(Base):
+class ConfiguracionesUsuario(Base):
     __tablename__ = "configuraciones_usuario"
     id = Column(Integer, primary_key=True)
     usuario_id = Column(Integer, ForeignKey("usuarios.id"))
-
+    tu_cuenta = Column (String(50))
+    accesibilidad_pantalla_idiomas = Column (String(50))
+    privacidad_seguridad = Column (String(50))
+    centro_ayudas = Column (String(50))
+    reporte_usuarios_bloqueados = Column (String(50))
+    cerrar_sesion = Column (String(50))
 
 class SeguimientoUsuario(Base):
     __tablename__ = "seguimientos_usuario"
     id = Column(Integer, primary_key=True)
     seguidor_id = Column(Integer, ForeignKey("usuarios.id"))
     seguido_id = Column(Integer, ForeignKey("usuarios.id"))
-
-   
-    
-
-    
