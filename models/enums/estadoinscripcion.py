@@ -4,4 +4,4 @@ class EstadoInscripcion(Enum):
     PENDIENTE = "Pendiente"
     ACEPTADO = "Aceptado"
     RECHAZADO = "Rechazado"
-    FINALIZADO = "Finalizado"
+    FINALIZADO = "Finalizado"   
